@@ -14,6 +14,10 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" href="icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- Firebase (Auth + Firestore) — bkz. dosya sonundaki KURULUM notları -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
 :root{
   --bg:#0A1628;--s1:#111E35;--s2:#1A2B47;--s3:#243554;
@@ -274,6 +278,77 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
 .btn-nlev:active{transform:scale(.97);}
 .rot-note{background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:10px 14px;font-size:11px;color:rgba(255,215,0,.8);display:flex;align-items:center;gap:7px;margin-bottom:12px;}
 
+/* ── AUTH ── */
+#pg-auth .scrollable{background:linear-gradient(160deg,#0A1628 0%,#0F1F3D 50%,#0A1628 100%);display:flex;align-items:center;}
+.auth-box{max-width:380px;margin:0 auto;padding:40px 20px;width:100%;}
+.auth-logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;text-align:center;}
+.auth-logo em{font-style:normal;background:linear-gradient(135deg,var(--ac),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.auth-sub{font-size:12px;color:var(--mu);text-align:center;margin-bottom:26px;}
+.auth-tabs{display:flex;background:var(--s1);border-radius:12px;padding:4px;margin-bottom:20px;gap:4px;}
+.auth-tab{flex:1;text-align:center;padding:9px;border-radius:9px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--mu);cursor:pointer;}
+.auth-tab.on{background:var(--ac);color:#fff;}
+.auth-field{margin-bottom:12px;}
+.auth-field label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);display:block;margin-bottom:6px;}
+.auth-field input{width:100%;background:var(--s1);border:1.5px solid var(--bd);border-radius:11px;padding:12px 14px;color:var(--tx);font-size:14px;font-family:'DM Sans',sans-serif;}
+.auth-field input:focus{outline:none;border-color:var(--ac);}
+.auth-btn{width:100%;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:14px;border-radius:13px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--ac),#FF8C5A);color:#fff;margin-top:6px;transition:transform .12s;}
+.auth-btn:active{transform:scale(.98);}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;}
+.auth-msg{font-size:12px;border-radius:10px;padding:10px 12px;margin-bottom:12px;line-height:1.5;}
+.auth-msg.err{background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.25);color:#FF9E9E;}
+.auth-msg.ok{background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.25);color:var(--ac2);}
+.auth-forgot{text-align:center;font-size:11px;color:var(--mu);margin-top:14px;cursor:pointer;text-decoration:underline;}
+
+/* ── USER BAR ── */
+.user-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--s1);border:1px solid var(--bd);border-radius:13px;padding:10px 14px;margin-bottom:16px;}
+.user-bar-l{font-size:11px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.user-bar-l strong{color:var(--tx);}
+.user-bar-r{display:flex;gap:6px;flex-shrink:0;}
+.ub-btn{font-size:10px;font-weight:700;background:var(--s2);color:var(--mu);border:none;border-radius:8px;padding:7px 10px;cursor:pointer;white-space:nowrap;}
+.ub-btn:active{background:var(--s3);}
+.ub-btn.gold{background:rgba(255,215,0,.15);color:var(--gold);}
+
+/* ── LOCKED LEVEL ── */
+.lev-card.locked{opacity:.5;cursor:not-allowed;}
+.lev-lock-badge{font-size:9px;font-weight:700;background:var(--s3);color:var(--mu);padding:3px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:3px;margin-top:2px;}
+
+/* ── CTA (Hadi eğitim / demo) ── */
+.cta-box{border-radius:15px;padding:16px;margin-bottom:14px;text-align:center;}
+.cta-low{background:rgba(255,80,80,.07);border:1px solid rgba(255,80,80,.25);}
+.cta-hi{background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.25);}
+.cta-t{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:5px;}
+.cta-low .cta-t{color:#FF9E9E;}.cta-hi .cta-t{color:var(--ac2);}
+.cta-s{font-size:11px;color:var(--mu);margin-bottom:12px;line-height:1.55;}
+.cta-btn{display:inline-block;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:11px 22px;border-radius:11px;text-decoration:none;color:#fff;}
+.cta-low .cta-btn{background:linear-gradient(135deg,var(--red),#FF8080);}
+.cta-hi .cta-btn{background:linear-gradient(135deg,var(--ac2),#4FE3C4);color:var(--bg);}
+
+/* ── RESUME PROMPT ── */
+.resume-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px;}
+.resume-card{background:var(--s1);border:1px solid var(--bd);border-radius:18px;padding:22px;max-width:340px;text-align:center;}
+.resume-card h3{font-family:'Syne',sans-serif;font-size:16px;margin-bottom:8px;}
+.resume-card p{font-size:12px;color:var(--mu);margin-bottom:16px;line-height:1.6;}
+.resume-btns{display:flex;gap:8px;}
+.resume-btns button{flex:1;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:12px;border-radius:11px;border:none;cursor:pointer;}
+.rb-cont{background:linear-gradient(135deg,var(--ac2),#4FE3C4);color:var(--bg);}
+.rb-new{background:var(--s2);color:var(--mu);}
+
+/* ── ADMIN ── */
+.adm-table{width:100%;border-collapse:collapse;font-size:11px;}
+.adm-table th{text-align:left;color:var(--mu);font-weight:700;padding:8px 6px;border-bottom:1px solid var(--bd);font-size:9px;text-transform:uppercase;letter-spacing:.5px;}
+.adm-table td{padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+.adm-lv{display:inline-block;width:20px;height:20px;line-height:20px;text-align:center;border-radius:6px;font-size:10px;font-weight:700;margin-right:2px;}
+.adm-lv.done{background:rgba(0,212,170,.2);color:var(--ac2);}
+.adm-lv.undone{background:var(--s2);color:var(--mu);}
+.adm-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+
+/* ── LEADERBOARD ── */
+.lb-row{display:flex;align-items:center;gap:10px;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.04);}
+.lb-rank{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--mu);width:24px;flex-shrink:0;}
+.lb-name{flex:1;font-size:12px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lb-xp{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--ac2);flex-shrink:0;}
+.lb-me{background:rgba(255,107,53,.08);border-radius:10px;}
+
 /* ── DESKTOP ENHANCEMENTS ── */
 @media(min-width:768px){
   .pg{position:absolute;}
@@ -294,13 +369,53 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
 <div class="xppop" id="xppop">⚡ +80 XP!</div>
 
 <!-- ══════════════════════════════════
+     AUTH (Giriş / Kayıt)
+══════════════════════════════════ -->
+<div id="pg-auth" class="pg on">
+  <div class="scrollable">
+    <div class="auth-box">
+      <h1 class="auth-logo">Değişim <em>Akademisi</em></h1>
+      <p class="auth-sub">Devam etmek için giriş yapın veya hesap oluşturun</p>
+      <div class="auth-tabs">
+        <div class="auth-tab on" id="tabLogin" onclick="setAuthTab('login')">Giriş Yap</div>
+        <div class="auth-tab" id="tabReg" onclick="setAuthTab('register')">Kayıt Ol</div>
+      </div>
+      <div id="authMsg"></div>
+
+      <div id="authFormLogin">
+        <div class="auth-field"><label>E-posta</label><input type="email" id="loginEmail" autocomplete="username" placeholder="ornek@eposta.com"></div>
+        <div class="auth-field"><label>Şifre</label><input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••"></div>
+        <button class="auth-btn" id="btnLogin" onclick="doLogin()">Giriş Yap</button>
+        <div class="auth-forgot" onclick="doForgotPassword()">Şifremi unuttum</div>
+      </div>
+
+      <div id="authFormReg" style="display:none">
+        <div class="auth-field"><label>Ad / Rumuz</label><input type="text" id="regNick" autocomplete="nickname" placeholder="Sıralamada görünecek isim"></div>
+        <div class="auth-field"><label>E-posta</label><input type="email" id="regEmail" autocomplete="username" placeholder="ornek@eposta.com"></div>
+        <div class="auth-field"><label>Şifre (en az 6 karakter)</label><input type="password" id="regPass" autocomplete="new-password" placeholder="••••••••"></div>
+        <div class="auth-field"><label>Şifre (tekrar)</label><input type="password" id="regPass2" autocomplete="new-password" placeholder="••••••••"></div>
+        <button class="auth-btn" id="btnReg" onclick="doRegister()">Hesap Oluştur</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
      LANDING
 ══════════════════════════════════ -->
-<div id="pg-land" class="pg on">
+<div id="pg-land" class="pg">
   <div class="scrollable">
     <div class="land-grid"></div>
     <div class="orb o1"></div><div class="orb o2"></div>
     <div class="inner" style="position:relative;z-index:1">
+      <div class="user-bar" id="userBar" style="display:none">
+        <div class="user-bar-l">👤 <strong id="userBarName">-</strong></div>
+        <div class="user-bar-r">
+          <button class="ub-btn" onclick="goLeaderboard()">🏆 Sıralama</button>
+          <button class="ub-btn gold" id="adminBtn" style="display:none" onclick="goAdmin()">⚙️ Admin</button>
+          <button class="ub-btn" onclick="doLogout()">Çıkış</button>
+        </div>
+      </div>
       <div class="chip">🎮 PWA · Offline · Mobil & Masaüstü</div>
       <h1 class="land-title">Değişim<br><em>Liderliği</em><br>Akademisi</h1>
       <p class="land-sub">Kotter, ADKAR ve Lewin modellerini 100 gerçek senaryo sorusuyla öğren. Ana ekrana ekle, offline oyna.</p>
@@ -330,7 +445,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
       </div>
 
       <div class="lev-cards">
-        <div class="lev-card lc-g" onclick="startLevel('g')">
+        <div class="lev-card lc-g" id="levCard-g" onclick="tryStartLevel('g')">
           <div class="lev-ico">🌱</div>
           <div class="lev-info">
             <div class="lev-name">Giriş</div>
@@ -339,21 +454,23 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
           </div>
           <div class="lev-arr">›</div>
         </div>
-        <div class="lev-card lc-s" onclick="startLevel('s')">
+        <div class="lev-card lc-s" id="levCard-s" onclick="tryStartLevel('s')">
           <div class="lev-ico">⚡</div>
           <div class="lev-info">
             <div class="lev-name">Orta</div>
             <div class="lev-desc">Kurumsal senaryolar, koalisyon, direnç ve vizyon yönetimi.</div>
             <div class="lev-pills"><span class="lev-pill">10 Soru</span><span class="lev-pill">~15 dk</span><span class="lev-pill">33 Soruluk Havuz</span></div>
+            <div class="lev-lock-badge" id="levLock-s" style="display:none">🔒 Önce Girişi tamamla</div>
           </div>
           <div class="lev-arr">›</div>
         </div>
-        <div class="lev-card lc-x" onclick="startLevel('x')">
+        <div class="lev-card lc-x" id="levCard-x" onclick="tryStartLevel('x')">
           <div class="lev-ico">🔥</div>
           <div class="lev-info">
             <div class="lev-name">Ustalık</div>
             <div class="lev-desc">Çok katmanlı kriz, model sentezi ve stratejik liderlik.</div>
             <div class="lev-pills"><span class="lev-pill">10 Soru</span><span class="lev-pill">~20 dk</span><span class="lev-pill">33 Soruluk Havuz</span></div>
+            <div class="lev-lock-badge" id="levLock-x" style="display:none">🔒 Önce Ortayı tamamla</div>
           </div>
           <div class="lev-arr">›</div>
         </div>
@@ -472,6 +589,36 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
   </div>
 </div>
 
+<!-- ══════════════════════════════════
+     ADMIN PANEL
+══════════════════════════════════ -->
+<div id="pg-admin" class="pg">
+  <div class="topbar">
+    <button class="back-btn" onclick="goHome()">‹</button>
+    <div class="topbar-title">⚙️ Admin Panel</div>
+  </div>
+  <div class="scrollable">
+    <div class="inner" id="adminInner">
+      <p style="font-size:12px;color:var(--mu)">Yükleniyor…</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     LEADERBOARD (Başarı Sıralaması)
+══════════════════════════════════ -->
+<div id="pg-leaderboard" class="pg">
+  <div class="topbar">
+    <button class="back-btn" onclick="goHome()">‹</button>
+    <div class="topbar-title">🏆 Başarı Sıralaması</div>
+  </div>
+  <div class="scrollable">
+    <div class="inner" id="lbInner">
+      <p style="font-size:12px;color:var(--mu)">Yükleniyor…</p>
+    </div>
+  </div>
+</div>
+
 <script>
 const POOL_G=[
 {ch:0,sc:'RetailTR — Dijital Adım',sit:'Orta ölçekli perakende şirketinde CEO dijitale geçmek istiyor. Kimse ne yapacağını bilmiyor.',q:"Kotter'ın 8 Adım Modeli'ne göre ilk yapılması gereken nedir?",opts:['Hemen yazılım satın al.','Pazar verisi ve rakip analizi ile aciliyet duygusu oluştur.','Tüm çalışanlara e-posta gönder.','Pilot ekip kur.'],correct:1,ok:"Kotter'ın 1. adımı 'Aciliyet Duygusu Yaratmak'tır. Somut veri olmadan kimse harekete geçmez.",no:'Satın alma veya duyuru erken adımlardır. Önce neden değişilmesi gerektiği hissettirilmeli.',theory:"Kotter Adım 1: Yönetimin %75'i 'değişmemek daha tehlikeli' diye hissetmeden sonraki adımlar boşlukta kalır.",comp:'Vizyon',xp:80},
@@ -586,6 +733,239 @@ const POOL_X=[
 </script>
 <script>
 // ═══════════════════════════════════════════
+//  FIREBASE KURULUMU — Hadi: kendi Firebase proje bilgilerinle değiştir!
+//  Nasıl alınır: console.firebase.google.com → Proje Oluştur →
+//  Authentication'da Email/Password'ü etkinleştir → Firestore Database oluştur →
+//  Project settings → General → "Your apps" → Web app → config objesini buraya yapıştır.
+// ═══════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "BURAYA_API_KEY_YAPISTIR",
+  authDomain: "BURAYA_PROJE.firebaseapp.com",
+  projectId: "BURAYA_PROJE_ID",
+  storageBucket: "BURAYA_PROJE.appspot.com",
+  messagingSenderId: "BURAYA_SENDER_ID",
+  appId: "BURAYA_APP_ID"
+};
+// Admin panelini görebilecek e-posta(lar) — kendi e-postanla değiştir:
+const ADMIN_EMAILS = ["hadi@hadiistanbullu.com"];
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let curUser=null, curUserData=null, authMode='login', resumeData=null;
+
+// ═══════════════════════════════════════════
+//  AUTH UI
+// ═══════════════════════════════════════════
+function setAuthTab(mode){
+  authMode=mode;
+  document.getElementById('tabLogin').className='auth-tab'+(mode==='login'?' on':'');
+  document.getElementById('tabReg').className='auth-tab'+(mode==='register'?' on':'');
+  document.getElementById('authFormLogin').style.display=mode==='login'?'block':'none';
+  document.getElementById('authFormReg').style.display=mode==='register'?'block':'none';
+  document.getElementById('authMsg').innerHTML='';
+}
+function showAuthMsg(msg,type){ document.getElementById('authMsg').innerHTML=`<div class="auth-msg ${type}">${msg}</div>`; }
+function authErrTr(err){
+  const c=err.code||'';
+  if(c.includes('email-already-in-use')) return 'Bu e-posta zaten kayıtlı. Giriş Yap sekmesini kullanın.';
+  if(c.includes('invalid-email')) return 'Geçersiz e-posta adresi.';
+  if(c.includes('wrong-password')||c.includes('invalid-credential')) return 'E-posta veya şifre hatalı.';
+  if(c.includes('user-not-found')) return 'Bu e-posta ile kayıtlı kullanıcı bulunamadı.';
+  if(c.includes('weak-password')) return 'Şifre çok zayıf; en az 6 karakter kullanın.';
+  if(c.includes('network-request-failed')) return 'İnternet bağlantısı gerekiyor.';
+  return 'Bir hata oluştu: '+(err.message||c);
+}
+function emptyLevels(){return {g:{completed:false,bestAcc:0,attempts:0,xp:0},s:{completed:false,bestAcc:0,attempts:0,xp:0},x:{completed:false,bestAcc:0,attempts:0,xp:0}};}
+function doRegister(){
+  const nick=document.getElementById('regNick').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const pass=document.getElementById('regPass').value;
+  const pass2=document.getElementById('regPass2').value;
+  if(!nick||!email||!pass){showAuthMsg('Lütfen tüm alanları doldurun.','err');return;}
+  if(pass.length<6){showAuthMsg('Şifre en az 6 karakter olmalı.','err');return;}
+  if(pass!==pass2){showAuthMsg('Şifreler eşleşmiyor.','err');return;}
+  document.getElementById('btnReg').disabled=true;
+  auth.createUserWithEmailAndPassword(email,pass).then(cred=>{
+    return db.collection('users').doc(cred.user.uid).set({
+      email, nickname:nick, createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      levels: emptyLevels(), inProgress:null, totalXp:0
+    }).then(()=>db.collection('leaderboard').doc(cred.user.uid).set({nickname:nick,totalXp:0,gDone:false,sDone:false,xDone:false}));
+  }).catch(err=>{
+    document.getElementById('btnReg').disabled=false;
+    showAuthMsg(authErrTr(err),'err');
+  });
+}
+function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  if(!email||!pass){showAuthMsg('E-posta ve şifre girin.','err');return;}
+  document.getElementById('btnLogin').disabled=true;
+  auth.signInWithEmailAndPassword(email,pass).catch(err=>{
+    document.getElementById('btnLogin').disabled=false;
+    showAuthMsg(authErrTr(err),'err');
+  });
+}
+function doLogout(){ auth.signOut(); }
+function doForgotPassword(){
+  const email=document.getElementById('loginEmail').value.trim();
+  if(!email){showAuthMsg('Önce e-posta adresinizi yazın, sonra tekrar tıklayın.','err');return;}
+  auth.sendPasswordResetEmail(email).then(()=>{
+    showAuthMsg('Şifre sıfırlama bağlantısı e-postanıza gönderildi.','ok');
+  }).catch(err=>showAuthMsg(authErrTr(err),'err'));
+}
+
+// ═══════════════════════════════════════════
+//  AUTH STATE → veri yükle, kilitleri güncelle
+// ═══════════════════════════════════════════
+auth.onAuthStateChanged(user=>{
+  if(user){
+    curUser=user;
+    document.getElementById('btnLogin').disabled=false;
+    db.collection('users').doc(user.uid).get().then(doc=>{
+      curUserData = doc.exists ? doc.data() : {email:user.email,nickname:user.email.split('@')[0],levels:emptyLevels(),inProgress:null,totalXp:0};
+      if(!doc.exists) db.collection('users').doc(user.uid).set(curUserData);
+      document.getElementById('userBarName').textContent=curUserData.nickname||user.email;
+      document.getElementById('userBar').style.display='flex';
+      document.getElementById('adminBtn').style.display = ADMIN_EMAILS.includes(user.email) ? 'inline-block' : 'none';
+      updateLevelLocks();
+      prevPg='pg-land'; showPg('pg-land');
+    });
+  } else {
+    curUser=null; curUserData=null;
+    setAuthTab('login');
+    showPg('pg-auth');
+  }
+});
+
+function updateLevelLocks(){
+  const lv=(curUserData&&curUserData.levels)||{};
+  const sLocked = !(lv.g && lv.g.completed);
+  const xLocked = !(lv.s && lv.s.completed);
+  document.getElementById('levLock-s').style.display = sLocked?'inline-flex':'none';
+  document.getElementById('levLock-x').style.display = xLocked?'inline-flex':'none';
+  document.getElementById('levCard-s').classList.toggle('locked', sLocked);
+  document.getElementById('levCard-x').classList.toggle('locked', xLocked);
+}
+
+// ═══════════════════════════════════════════
+//  SEVİYE GİRİŞ / DEVAM ETME (RESUME)
+// ═══════════════════════════════════════════
+function tryStartLevel(lev){
+  if(!curUserData) return;
+  if(lev==='s' && !(curUserData.levels.g && curUserData.levels.g.completed)){ popup('🔒 Önce Giriş seviyesini tamamla'); return; }
+  if(lev==='x' && !(curUserData.levels.s && curUserData.levels.s.completed)){ popup('🔒 Önce Orta seviyesini tamamla'); return; }
+  const ip=curUserData.inProgress;
+  if(ip && ip.lev===lev){ resumeData=ip; showResumePrompt(lev); }
+  else { startLevel(lev); }
+}
+function showResumePrompt(lev){
+  const cfg=LEV[lev];
+  const ov=document.createElement('div');
+  ov.className='resume-ov'; ov.id='resumeOv';
+  ov.innerHTML=`<div class="resume-card">
+    <h3>${cfg.i} Yarım Kalan Oyun</h3>
+    <p>${cfg.n} seviyesinde kaldığın yerden (Soru ${resumeData.qi+1}/${resumeData.qs.length}) devam edebilirsin.</p>
+    <div class="resume-btns">
+      <button class="rb-cont" onclick="resumeLevel()">Devam Et</button>
+      <button class="rb-new" onclick="startLevel('${lev}')">Yeniden Başla</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+}
+function closeResumeOv(){ const ov=document.getElementById('resumeOv'); if(ov) ov.remove(); }
+function resumeLevel(){
+  closeResumeOv();
+  const d=resumeData; curLev=d.lev;
+  S={lev:d.lev,qs:d.qs,qi:d.qi,sel:d.sel,ans:d.ans,score:d.score,xp:d.xp,streak:d.streak,chOk:d.chOk,results:d.results};
+  prevPg='pg-game';
+  const cfg=LEV[d.lev];
+  const b=document.getElementById('hudBadge'); b.textContent=cfg.i+' '+cfg.n; b.className='hud-badge '+cfg.bc;
+  const p=document.getElementById('progBar'); p.className='prog-in '+cfg.pc; p.style.width=(d.qi/d.qs.length*100)+'%';
+  showPg('pg-game'); renderAll();
+}
+function saveProgress(){
+  if(!curUser||!S||!curUserData) return;
+  const ip={lev:S.lev,qs:S.qs,qi:S.qi,sel:S.sel,ans:S.ans,score:S.score,xp:S.xp,streak:S.streak,chOk:S.chOk,results:S.results};
+  curUserData.inProgress=ip;
+  db.collection('users').doc(curUser.uid).update({inProgress:ip}).catch(()=>{});
+}
+function markLevelComplete(acc){
+  if(!curUser||!curUserData) return;
+  const lev=S.lev;
+  const prev = curUserData.levels[lev]||{completed:false,bestAcc:0,attempts:0,xp:0};
+  const newLevels = {...curUserData.levels, [lev]:{
+    completed:true, bestAcc:Math.max(prev.bestAcc||0,acc), attempts:(prev.attempts||0)+1, xp:Math.max(prev.xp||0,S.xp)
+  }};
+  const totalXp = Object.values(newLevels).reduce((a,l)=>a+(l.xp||0),0);
+  curUserData.levels=newLevels; curUserData.totalXp=totalXp; curUserData.inProgress=null;
+  db.collection('users').doc(curUser.uid).update({levels:newLevels, totalXp, inProgress:null}).catch(()=>{});
+  db.collection('leaderboard').doc(curUser.uid).set({
+    nickname:curUserData.nickname, totalXp,
+    gDone:!!newLevels.g.completed, sDone:!!newLevels.s.completed, xDone:!!newLevels.x.completed
+  },{merge:true}).catch(()=>{});
+  updateLevelLocks();
+}
+
+// ═══════════════════════════════════════════
+//  ADMIN PANELİ
+// ═══════════════════════════════════════════
+function goAdmin(){ prevPg='pg-land'; showPg('pg-admin'); renderAdmin(); }
+function renderAdmin(){
+  const el=document.getElementById('adminInner');
+  if(!curUser||!ADMIN_EMAILS.includes(curUser.email)){ el.innerHTML='<p style="font-size:12px;color:var(--mu)">Bu sayfaya erişim yetkiniz yok.</p>'; return; }
+  el.innerHTML='<p style="font-size:12px;color:var(--mu)">Yükleniyor…</p>';
+  db.collection('users').get().then(snap=>{
+    let total=snap.size, gDone=0,xDone=0,rows='';
+    snap.forEach(doc=>{
+      const d=doc.data(), lv=d.levels||{};
+      if(lv.g&&lv.g.completed) gDone++;
+      if(lv.x&&lv.x.completed) xDone++;
+      const inProg = d.inProgress ? `${d.inProgress.lev.toUpperCase()} · Soru ${d.inProgress.qi+1}/${d.inProgress.qs.length}` : '—';
+      rows+=`<tr>
+        <td>${d.nickname||'-'}<br><span style="color:var(--mu);font-size:9px">${d.email||''}</span></td>
+        <td><span class="adm-lv ${lv.g&&lv.g.completed?'done':'undone'}">G</span><span class="adm-lv ${lv.s&&lv.s.completed?'done':'undone'}">O</span><span class="adm-lv ${lv.x&&lv.x.completed?'done':'undone'}">U</span></td>
+        <td>${lv.g?lv.g.bestAcc||0:0}/${lv.s?lv.s.bestAcc||0:0}/${lv.x?lv.x.bestAcc||0:0}%</td>
+        <td>${d.totalXp||0}</td>
+        <td>${inProg}</td>
+      </tr>`;
+    });
+    el.innerHTML=`
+      <div class="adm-summary">
+        <div class="rs"><div class="rs-n">${total}</div><div class="rs-l">Kayıtlı Kullanıcı</div></div>
+        <div class="rs"><div class="rs-n">${gDone}</div><div class="rs-l">Giriş Tamamlayan</div></div>
+        <div class="rs"><div class="rs-n">${xDone}</div><div class="rs-l">Ustalık Tamamlayan</div></div>
+      </div>
+      <div style="overflow-x:auto"><table class="adm-table">
+        <thead><tr><th>Kullanıcı</th><th>Seviye</th><th>En İyi Başarı</th><th>Toplam XP</th><th>Yarım Kalan</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }).catch(err=>{ el.innerHTML='<p style="font-size:12px;color:var(--red)">Veri yüklenemedi: '+err.message+'</p>'; });
+}
+
+// ═══════════════════════════════════════════
+//  BAŞARI SIRALAMASI (LEADERBOARD)
+// ═══════════════════════════════════════════
+function goLeaderboard(){ prevPg='pg-land'; showPg('pg-leaderboard'); renderLeaderboard(); }
+function renderLeaderboard(){
+  const el=document.getElementById('lbInner');
+  el.innerHTML='<p style="font-size:12px;color:var(--mu)">Yükleniyor…</p>';
+  db.collection('leaderboard').orderBy('totalXp','desc').limit(50).get().then(snap=>{
+    let rows='',i=0;
+    snap.forEach(doc=>{
+      i++;
+      const d=doc.data();
+      const me = curUser && doc.id===curUser.uid;
+      const medal=i===1?'🥇':i===2?'🥈':i===3?'🥉':i;
+      const badges=(d.gDone?'🌱':'')+(d.sDone?'⚡':'')+(d.xDone?'🔥':'');
+      rows+=`<div class="lb-row ${me?'lb-me':''}"><span class="lb-rank">${medal}</span><span class="lb-name">${d.nickname||'-'} ${badges}</span><span class="lb-xp">${d.totalXp||0} XP</span></div>`;
+    });
+    el.innerHTML = rows || '<p style="font-size:12px;color:var(--mu)">Henüz kimse bir seviyeyi tamamlamadı.</p>';
+  }).catch(err=>{ el.innerHTML='<p style="font-size:12px;color:var(--red)">Veri yüklenemedi: '+err.message+'</p>'; });
+}
+
+// ═══════════════════════════════════════════
 //  SERVICE WORKER
 // ═══════════════════════════════════════════
 if('serviceWorker' in navigator){
@@ -678,13 +1058,14 @@ function goHome(){prevPg='pg-land';showPg('pg-land');}
 function goModels(){prevPg=document.querySelector('.pg.on')?.id||'pg-land';showPg('pg-models');}
 function goBack(){showPg(prevPg);}
 function startLevel(lev){
+  closeResumeOv();
   curLev=lev; S=mkState(lev); prevPg='pg-game';
   const cfg=LEV[lev];
   const b=document.getElementById('hudBadge');
   b.textContent=cfg.i+' '+cfg.n; b.className='hud-badge '+cfg.bc;
   const p=document.getElementById('progBar');
   p.className='prog-in '+cfg.pc; p.style.width='0%';
-  showPg('pg-game'); renderAll();
+  showPg('pg-game'); renderAll(); saveProgress();
 }
 function replaySame(){startLevel(curLev);}
 
@@ -718,11 +1099,12 @@ function submitAnswer(){
   } else { S.streak=0; }
   document.getElementById('hScore').textContent=S.score;
   document.getElementById('hXP').textContent=S.xp;
-  renderCenter();
+  renderCenter(); saveProgress();
 }
 function nextQ(){
   S.qi++; S.sel=null; S.ans=false;
   if(S.qi>=S.qs.length){showResults();return;}
+  saveProgress();
   document.getElementById('gscroll').scrollTop=0;
   renderCenter(); renderHUD();
 }
@@ -795,6 +1177,22 @@ function showResults(){
   const L=['A','B','C','D'];
   const bCls={g:'rb-g',s:'rb-s',x:'rb-x'}[S.lev];
   const nlCls={s:'nl-s',x:'nl-x'};
+  markLevelComplete(acc);
+
+  let ctaHtml='';
+  if(acc<50){
+    ctaHtml=`<div class="cta-box cta-low">
+<div class="cta-t">💪 Bu seviyede desteğe ihtiyacın olabilir</div>
+<div class="cta-s">Bu seferki başarın %50'nin altında kaldı. Hadi İstanbullu'dan birebir eğitim alarak bu konuları netleştirebilirsin.</div>
+<a class="cta-btn" href="https://hadiistanbullu.com" target="_blank" rel="noopener">Hadi İstanbullu'dan Eğitim Al</a>
+</div>`;
+  } else {
+    ctaHtml=`<div class="cta-box cta-hi">
+<div class="cta-t">🚀 Daha da iyi olmak ister misin?</div>
+<div class="cta-s">hadiistanbullu.com üzerinden ücretsiz demo eğitime katılarak bilgini derinleştirebilirsin.</div>
+<a class="cta-btn" href="https://hadiistanbullu.com" target="_blank" rel="noopener">Ücretsiz Demo Eğitime Katıl</a>
+</div>`;
+  }
 
   const chHtml=chs.map((ch,i)=>{
     const cqs=S.qs.filter(q=>q.ch===i).length; if(!cqs) return '';
@@ -846,6 +1244,7 @@ function showResults(){
   <div class="rs"><div class="rs-n" style="color:var(--ac)">${cor}/${tot}</div><div class="rs-l">Doğru</div></div>
 </div>
 <div class="res-cert"><strong>🎓 Tamamlama Belgesi</strong><br>Bu seviyeyi tamamlayarak Kotter, ADKAR ve Lewin modellerini uygulamalı olarak deneyimledin.</div>
+${ctaHtml}
 <div class="res-sec"><div class="res-sec-t">📊 Bölüm Performansı</div>${chHtml}</div>
 <div class="rot-note">🔄 <strong>Senaryo Rotasyonu:</strong> Tekrar oynadığında ${cfg.pool?cfg.pool.length:'100'} soruluk havuzdan farklı ${cfg.cnt} soru gelir.</div>
 ${nlHtml}
