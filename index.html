@@ -301,6 +301,18 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
 .auth-consent-text a:hover{text-decoration:underline;}
 .auth-consent.required-err input[type=checkbox]{border-color:#FF4D4D;}
 .auth-consent.required-err .auth-consent-text{color:#FF4D4D;}
+.verify-screen{text-align:center;padding:8px 0;}
+.verify-icon{font-size:48px;margin-bottom:12px;}
+.verify-title{font-size:17px;font-weight:700;color:#F1F5F9;margin-bottom:8px;}
+.verify-sub{font-size:13px;color:#94A3B8;line-height:1.7;margin-bottom:20px;}
+.verify-email-badge{display:inline-block;background:rgba(249,115,22,0.15);border:1px solid rgba(249,115,22,0.35);border-radius:8px;padding:7px 16px;font-size:13px;font-weight:600;color:#F97316;margin-bottom:20px;}
+.verify-btn{width:100%;padding:13px;border-radius:13px;border:none;cursor:pointer;font-size:14px;font-weight:700;font-family:'Syne',sans-serif;background:linear-gradient(135deg,#F97316,#FF8C5A);color:#fff;margin-bottom:10px;transition:opacity .15s;}
+.verify-btn:hover{opacity:.88;}
+.verify-resend{width:100%;padding:11px;border-radius:13px;border:1.5px solid rgba(255,255,255,0.12);background:transparent;color:#94A3B8;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+.verify-resend:hover{border-color:rgba(249,115,22,0.4);color:#F97316;}
+.verify-resend:disabled{opacity:.4;cursor:not-allowed;}
+.verify-back{display:block;margin-top:14px;font-size:12px;color:#64748B;cursor:pointer;text-decoration:underline;}
+.verify-back:hover{color:#94A3B8;}
 .auth-msg{font-size:12px;border-radius:10px;padding:10px 12px;margin-bottom:12px;line-height:1.5;}
 .auth-msg.err{background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.25);color:#FF9E9E;}
 .auth-msg.ok{background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.25);color:var(--ac2);}
@@ -420,6 +432,25 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
         </label>
 
         <button class="auth-btn" id="btnReg" onclick="doRegister()">Hesap Oluştur</button>
+      </div>
+      <!-- DOĞRULAMA BEKLİYOR EKRANI -->
+      <div id="authFormVerify" style="display:none">
+        <div class="verify-screen">
+          <div class="verify-icon">📬</div>
+          <div class="verify-title">E-postanızı doğrulayın</div>
+          <div class="verify-sub">
+            Hesabınız oluşturuldu. Devam edebilmek için<br>
+            aşağıdaki adrese gönderilen doğrulama bağlantısına tıklayın:
+          </div>
+          <div class="verify-email-badge" id="verifyEmailBadge">—</div>
+          <button class="verify-btn" onclick="checkVerification()">
+            ✅ Doğruladım, Giriş Yap
+          </button>
+          <button class="verify-resend" id="resendBtn" onclick="resendVerification()">
+            📨 Doğrulama mailini tekrar gönder
+          </button>
+          <a class="verify-back" onclick="backToLogin()">← Farklı hesapla giriş yap</a>
+        </div>
       </div>
     </div>
   </div>
@@ -825,6 +856,10 @@ function doRegister(){
 
   document.getElementById('btnReg').disabled=true;
   auth.createUserWithEmailAndPassword(email,pass).then(cred=>{
+    // Doğrulama maili gönder
+    cred.user.sendEmailVerification({
+      url: window.location.href  // doğrulama sonrası geri dön
+    });
     return db.collection('users').doc(cred.user.uid).set({
       email, nickname:nick,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -832,10 +867,23 @@ function doRegister(){
       kvkkOnay: true,
       emailOnay: emailConsent,
       kayitTarihi: new Date().toISOString()
-    }).then(()=>db.collection('leaderboard').doc(cred.user.uid).set({
-      nickname:nick, totalXp:0, gDone:false, sDone:false, xDone:false,
-      emailOnay: emailConsent
-    }));
+    }).then(()=>{
+      db.collection('leaderboard').doc(cred.user.uid).set({
+        nickname:nick, totalXp:0, gDone:false, sDone:false, xDone:false,
+        emailOnay: emailConsent
+      });
+      // Oturumu kapat ve doğrulama ekranını göster
+      auth.signOut().then(()=>{
+        document.getElementById('verifyEmailBadge').textContent = email;
+        document.getElementById('authFormReg').style.display='none';
+        document.getElementById('authFormVerify').style.display='block';
+        document.getElementById('tabReg').classList.remove('on');
+        document.getElementById('btnReg').disabled=false;
+        showAuthMsg('','');
+        // Yeniden gönder butonunu 60 sn kilitle
+        startResendCooldown();
+      });
+    });
   }).catch(err=>{
     document.getElementById('btnReg').disabled=false;
     showAuthMsg(authErrTr(err),'err');
@@ -846,12 +894,87 @@ function doLogin(){
   const pass=document.getElementById('loginPass').value;
   if(!email||!pass){showAuthMsg('E-posta ve şifre girin.','err');return;}
   document.getElementById('btnLogin').disabled=true;
-  auth.signInWithEmailAndPassword(email,pass).catch(err=>{
+  auth.signInWithEmailAndPassword(email,pass).then(cred=>{
+    if(!cred.user.emailVerified){
+      // Doğrulanmamış hesap — oturumu kapat, doğrulama ekranını göster
+      auth.signOut().then(()=>{
+        document.getElementById('btnLogin').disabled=false;
+        document.getElementById('verifyEmailBadge').textContent=email;
+        document.getElementById('authFormReg').style.display='none';
+        setAuthTab('login');
+        document.getElementById('authFormVerify').style.display='block';
+        showAuthMsg('','');
+        startResendCooldown();
+        // Doğrulama ekranında yeniden gönderebilmek için geçici oturum aç
+        window._pendingEmail=email; window._pendingPass=pass;
+      });
+    }
+    // Doğrulanmışsa onAuthStateChanged devreye girer, otomatik geçiş olur
+  }).catch(err=>{
     document.getElementById('btnLogin').disabled=false;
     showAuthMsg(authErrTr(err),'err');
   });
 }
 function doLogout(){ auth.signOut(); }
+
+function checkVerification(){
+  const btn=document.getElementById('btnReg');
+  // Pending credentials varsa onlarla giriş dene
+  const email=window._pendingEmail||document.getElementById('verifyEmailBadge').textContent;
+  const pass=window._pendingPass||'';
+  if(!pass){ showAuthMsg('Lütfen giriş ekranından şifrenizle giriş yapın.','err'); backToLogin(); return; }
+  showAuthMsg('Kontrol ediliyor…','ok');
+  auth.signInWithEmailAndPassword(email,pass).then(cred=>{
+    if(cred.user.emailVerified){
+      window._pendingEmail=null; window._pendingPass=null;
+      showAuthMsg('','');
+      // onAuthStateChanged devreye girer
+    } else {
+      auth.signOut();
+      showAuthMsg('E-posta henüz doğrulanmamış. Lütfen gelen kutunuzu kontrol edin.','err');
+    }
+  }).catch(err=>showAuthMsg(authErrTr(err),'err'));
+}
+
+function resendVerification(){
+  const email=window._pendingEmail||document.getElementById('verifyEmailBadge').textContent;
+  const pass=window._pendingPass||'';
+  if(!pass){ showAuthMsg('Oturum süresi doldu. Lütfen tekrar kayıt olmayı deneyin.','err'); return; }
+  auth.signInWithEmailAndPassword(email,pass).then(cred=>{
+    return cred.user.sendEmailVerification({ url: window.location.href });
+  }).then(()=>{
+    auth.signOut();
+    showAuthMsg('Doğrulama maili tekrar gönderildi. Spam kutusunu da kontrol edin.','ok');
+    startResendCooldown();
+  }).catch(err=>showAuthMsg(authErrTr(err),'err'));
+}
+
+let _resendTimer=null;
+function startResendCooldown(){
+  const btn=document.getElementById('resendBtn');
+  if(!btn) return;
+  let secs=60;
+  btn.disabled=true;
+  btn.textContent='📨 Tekrar gönder ('+secs+'s)';
+  if(_resendTimer) clearInterval(_resendTimer);
+  _resendTimer=setInterval(()=>{
+    secs--;
+    if(secs<=0){
+      clearInterval(_resendTimer);
+      btn.disabled=false;
+      btn.textContent='📨 Doğrulama mailini tekrar gönder';
+    } else {
+      btn.textContent='📨 Tekrar gönder ('+secs+'s)';
+    }
+  },1000);
+}
+
+function backToLogin(){
+  document.getElementById('authFormVerify').style.display='none';
+  window._pendingEmail=null; window._pendingPass=null;
+  setAuthTab('login');
+  showAuthMsg('','');
+}
 function doForgotPassword(){
   const email=document.getElementById('loginEmail').value.trim();
   if(!email){showAuthMsg('Önce e-posta adresinizi yazın, sonra tekrar tıklayın.','err');return;}
