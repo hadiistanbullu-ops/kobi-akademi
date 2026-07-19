@@ -317,6 +317,21 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
 .auth-msg.err{background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.25);color:#FF9E9E;}
 .auth-msg.ok{background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.25);color:var(--ac2);}
 .auth-forgot{text-align:center;font-size:11px;color:var(--mu);margin-top:14px;cursor:pointer;text-decoration:underline;}
+.reset-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
+.reset-modal{background:#112240;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:28px 24px;width:100%;max-width:380px;}
+.reset-modal-title{font-size:16px;font-weight:700;color:#F1F5F9;margin-bottom:6px;}
+.reset-modal-sub{font-size:12px;color:#94A3B8;margin-bottom:18px;line-height:1.6;}
+.reset-modal input{width:100%;background:#0B1628;border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 14px;color:#F1F5F9;font-size:14px;outline:none;margin-bottom:12px;}
+.reset-modal input:focus{border-color:#F97316;}
+.reset-modal-msg{font-size:12px;min-height:16px;margin-bottom:10px;text-align:center;}
+.reset-modal-msg.ok{color:#10B981;}
+.reset-modal-msg.err{color:#FF4D4D;}
+.reset-modal-btns{display:flex;gap:8px;}
+.reset-send-btn{flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#F97316,#FF8C5A);color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s;}
+.reset-send-btn:hover{opacity:.88;}
+.reset-send-btn:disabled{opacity:.45;cursor:not-allowed;}
+.reset-cancel-btn{padding:12px 16px;border-radius:10px;border:1.5px solid rgba(255,255,255,0.12);background:transparent;color:#94A3B8;font-size:13px;cursor:pointer;}
+.reset-cancel-btn:hover{color:#F1F5F9;}
 
 /* ── USER BAR ── */
 .user-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--s1);border:1px solid var(--bd);border-radius:13px;padding:10px 14px;margin-bottom:16px;}
@@ -946,11 +961,76 @@ function backToLogin(){
   showAuthMsg('','');
 }
 function doForgotPassword(){
-  const email=document.getElementById('loginEmail').value.trim();
-  if(!email){showAuthMsg('Önce e-posta adresinizi yazın, sonra tekrar tıklayın.','err');return;}
+  // Giriş alanında mail varsa oradan al, yoksa popup aç
+  const prefill = document.getElementById('loginEmail').value.trim();
+  openResetModal(prefill);
+}
+
+function openResetModal(prefill){
+  // Varsa önceki modalı kaldır
+  const existing = document.getElementById('resetModalOverlay');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'reset-modal-overlay';
+  overlay.id = 'resetModalOverlay';
+  overlay.onclick = (e) => { if(e.target===overlay) closeResetModal(); };
+  overlay.innerHTML = `
+    <div class="reset-modal">
+      <div class="reset-modal-title">🔑 Şifremi Unuttum</div>
+      <div class="reset-modal-sub">
+        Kayıtlı e-posta adresinizi girin. Şifre sıfırlama bağlantısı gönderilecek.<br>
+        <strong style="color:#F97316">Spam / Gereksiz</strong> klasörünü de kontrol etmeyi unutmayın.
+      </div>
+      <input type="email" id="resetEmailInput" placeholder="ornek@eposta.com" value="${prefill || ''}"
+             onkeydown="if(event.key==='Enter') sendResetEmail()">
+      <div class="reset-modal-msg" id="resetMsg"></div>
+      <div class="reset-modal-btns">
+        <button class="reset-cancel-btn" onclick="closeResetModal()">Vazgeç</button>
+        <button class="reset-send-btn" id="resetSendBtn" onclick="sendResetEmail()">
+          📨 Sıfırlama Maili Gönder
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  setTimeout(()=>{ const inp=document.getElementById('resetEmailInput'); if(inp) inp.focus(); }, 100);
+}
+
+function sendResetEmail(){
+  const email = document.getElementById('resetEmailInput').value.trim();
+  const msgEl = document.getElementById('resetMsg');
+  const btn = document.getElementById('resetSendBtn');
+  if(!email || !email.includes('@')){
+    msgEl.className='reset-modal-msg err';
+    msgEl.textContent='Geçerli bir e-posta adresi girin.';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Gönderiliyor…';
+  msgEl.className='reset-modal-msg';
+  msgEl.textContent='';
   auth.sendPasswordResetEmail(email).then(()=>{
-    showAuthMsg('Şifre sıfırlama bağlantısı e-postanıza gönderildi.','ok');
-  }).catch(err=>showAuthMsg(authErrTr(err),'err'));
+    msgEl.className='reset-modal-msg ok';
+    msgEl.textContent='✅ Sıfırlama bağlantısı gönderildi! Spam klasörünü de kontrol edin.';
+    btn.textContent='Gönderildi ✓';
+    setTimeout(()=>closeResetModal(), 3000);
+  }).catch(err=>{
+    btn.disabled=false;
+    btn.textContent='📨 Sıfırlama Maili Gönder';
+    msgEl.className='reset-modal-msg err';
+    const msg = err.code==='auth/user-not-found'
+      ? 'Bu e-posta ile kayıtlı hesap bulunamadı.'
+      : err.code==='auth/invalid-email'
+      ? 'Geçersiz e-posta adresi.'
+      : 'Hata: ' + err.message;
+    msgEl.textContent=msg;
+  });
+}
+
+function closeResetModal(){
+  const el=document.getElementById('resetModalOverlay');
+  if(el) el.remove();
 }
 
 // ═══════════════════════════════════════════
