@@ -856,10 +856,6 @@ function doRegister(){
 
   document.getElementById('btnReg').disabled=true;
   auth.createUserWithEmailAndPassword(email,pass).then(cred=>{
-    // Doğrulama maili gönder
-    cred.user.sendEmailVerification({
-      url: window.location.href  // doğrulama sonrası geri dön
-    });
     return db.collection('users').doc(cred.user.uid).set({
       email, nickname:nick,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -872,17 +868,7 @@ function doRegister(){
         nickname:nick, totalXp:0, gDone:false, sDone:false, xDone:false,
         emailOnay: emailConsent
       });
-      // Oturumu kapat ve doğrulama ekranını göster
-      auth.signOut().then(()=>{
-        document.getElementById('verifyEmailBadge').textContent = email;
-        document.getElementById('authFormReg').style.display='none';
-        document.getElementById('authFormVerify').style.display='block';
-        document.getElementById('tabReg').classList.remove('on');
-        document.getElementById('btnReg').disabled=false;
-        showAuthMsg('','');
-        // Yeniden gönder butonunu 60 sn kilitle
-        startResendCooldown();
-      });
+      document.getElementById('btnReg').disabled=false;
     });
   }).catch(err=>{
     document.getElementById('btnReg').disabled=false;
@@ -894,23 +880,7 @@ function doLogin(){
   const pass=document.getElementById('loginPass').value;
   if(!email||!pass){showAuthMsg('E-posta ve şifre girin.','err');return;}
   document.getElementById('btnLogin').disabled=true;
-  auth.signInWithEmailAndPassword(email,pass).then(cred=>{
-    if(!cred.user.emailVerified){
-      // Doğrulanmamış hesap — oturumu kapat, doğrulama ekranını göster
-      auth.signOut().then(()=>{
-        document.getElementById('btnLogin').disabled=false;
-        document.getElementById('verifyEmailBadge').textContent=email;
-        document.getElementById('authFormReg').style.display='none';
-        setAuthTab('login');
-        document.getElementById('authFormVerify').style.display='block';
-        showAuthMsg('','');
-        startResendCooldown();
-        // Doğrulama ekranında yeniden gönderebilmek için geçici oturum aç
-        window._pendingEmail=email; window._pendingPass=pass;
-      });
-    }
-    // Doğrulanmışsa onAuthStateChanged devreye girer, otomatik geçiş olur
-  }).catch(err=>{
+  auth.signInWithEmailAndPassword(email,pass).catch(err=>{
     document.getElementById('btnLogin').disabled=false;
     showAuthMsg(authErrTr(err),'err');
   });
