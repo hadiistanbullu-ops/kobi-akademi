@@ -405,8 +405,9 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
 <!-- ══════════════════════════════════
      AUTH (Giriş / Kayıt)
 ══════════════════════════════════ -->
-<div id="pg-auth" class="pg on">
-  <div class="scrollable">
+<div id="pg-auth" class="pg">
+  <div class="scrollable" style="position:relative">
+    <button class="back-btn" style="position:absolute;top:14px;left:14px;z-index:2" onclick="goHome()">‹</button>
     <div class="auth-box">
       <h1 class="auth-logo">Değişim <em>Akademisi</em></h1>
       <p class="auth-sub">Devam etmek için giriş yapın veya hesap oluşturun</p>
@@ -474,17 +475,18 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
 <!-- ══════════════════════════════════
      LANDING
 ══════════════════════════════════ -->
-<div id="pg-land" class="pg">
+<div id="pg-land" class="pg on">
   <div class="scrollable">
     <div class="land-grid"></div>
     <div class="orb o1"></div><div class="orb o2"></div>
     <div class="inner" style="position:relative;z-index:1">
-      <div class="user-bar" id="userBar" style="display:none">
-        <div class="user-bar-l">👤 <strong id="userBarName">-</strong></div>
+      <div class="user-bar" id="userBar" style="display:flex">
+        <div class="user-bar-l">👤 <strong id="userBarName">Misafir (Demo)</strong></div>
         <div class="user-bar-r">
-          <button class="ub-btn" onclick="goLeaderboard()">🏆 Sıralama</button>
+          <button class="ub-btn" id="lbBtn" style="display:none" onclick="goLeaderboard()">🏆 Sıralama</button>
           <button class="ub-btn gold" id="adminBtn" style="display:none" onclick="goAdmin()">⚙️ Admin</button>
-          <button class="ub-btn" onclick="doLogout()">Çıkış</button>
+          <button class="ub-btn" id="loginBtn" onclick="openAuthFromLand()">🔑 Giriş Yap</button>
+          <button class="ub-btn" id="logoutBtn" style="display:none" onclick="doLogout()">Çıkış</button>
         </div>
       </div>
       <div class="chip">🎮 PWA · Offline · Mobil & Masaüstü</div>
@@ -505,7 +507,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
           <div class="icard"><h4>❌ Hata Açıklaması</h4><p>Yanlış cevaplarda doğru yanıt + model referansı gösterilir.</p></div>
           <div class="icard"><h4>📴 Tam Offline</h4><p>Bir kez yükle, internet olmadan oyna. Tam PWA.</p></div>
         </div>
-        <p class="idesc"><strong>3 seviye:</strong> Giriş · Orta · Ustalık — Her seviyede 10 soru, toplam <strong>100 soruluk havuz</strong>.</p>
+        <p class="idesc"><strong>3 seviye:</strong> Kaşif · Stratejist · Dönüşüm Lideri — Her seviyede 10 soru, toplam <strong>100 soruluk havuz</strong>.</p>
       </div>
 
       <div class="stats-row">
@@ -517,31 +519,31 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
 
       <div class="lev-cards">
         <div class="lev-card lc-g" id="levCard-g" onclick="tryStartLevel('g')">
-          <div class="lev-ico">🌱</div>
+          <div class="lev-ico">🟢</div>
           <div class="lev-info">
-            <div class="lev-name">Giriş</div>
-            <div class="lev-desc">Temel kavramlar, model tanımları ve ilk uygulama senaryoları.</div>
-            <div class="lev-pills"><span class="lev-pill">10 Soru</span><span class="lev-pill">~10 dk</span><span class="lev-pill">34 Soruluk Havuz</span></div>
+            <div class="lev-name">Kaşif 🔍</div>
+            <div class="lev-desc">Değişimi keşfetmeye başla.</div>
+            <div class="lev-pills"><span class="lev-pill">10 Soru</span><span class="lev-pill">~10 dk</span><span class="lev-pill">Ücretsiz Demo</span></div>
           </div>
           <div class="lev-arr">›</div>
         </div>
         <div class="lev-card lc-s" id="levCard-s" onclick="tryStartLevel('s')">
-          <div class="lev-ico">⚡</div>
+          <div class="lev-ico">🟡</div>
           <div class="lev-info">
-            <div class="lev-name">Orta</div>
-            <div class="lev-desc">Kurumsal senaryolar, koalisyon, direnç ve vizyon yönetimi.</div>
+            <div class="lev-name">Stratejist ♟️</div>
+            <div class="lev-desc">Değişimi planla ve yönet.</div>
             <div class="lev-pills"><span class="lev-pill">10 Soru</span><span class="lev-pill">~15 dk</span><span class="lev-pill">33 Soruluk Havuz</span></div>
-            <div class="lev-lock-badge" id="levLock-s" style="display:none">🔒 Önce Girişi tamamla</div>
+            <div class="lev-lock-badge" id="levLock-s" style="display:none">🔒 Kaşif'te %60+ başarı + hesap gerekli</div>
           </div>
           <div class="lev-arr">›</div>
         </div>
         <div class="lev-card lc-x" id="levCard-x" onclick="tryStartLevel('x')">
-          <div class="lev-ico">🔥</div>
+          <div class="lev-ico">🔴</div>
           <div class="lev-info">
-            <div class="lev-name">Ustalık</div>
-            <div class="lev-desc">Çok katmanlı kriz, model sentezi ve stratejik liderlik.</div>
+            <div class="lev-name">Dönüşüm Lideri 🚀</div>
+            <div class="lev-desc">Organizasyona yön ver.</div>
             <div class="lev-pills"><span class="lev-pill">10 Soru</span><span class="lev-pill">~20 dk</span><span class="lev-pill">33 Soruluk Havuz</span></div>
-            <div class="lev-lock-badge" id="levLock-x" style="display:none">🔒 Önce Ortayı tamamla</div>
+            <div class="lev-lock-badge" id="levLock-x" style="display:none">🔒 Önce Stratejist'i tamamla</div>
           </div>
           <div class="lev-arr">›</div>
         </div>
@@ -564,7 +566,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans'
       <button class="back-btn" onclick="goHome()">‹</button>
       <div class="hud-info">
         <div class="hud-logo">Değişim Akademisi</div>
-        <div class="hud-badge" id="hudBadge">🌱 Giriş</div>
+        <div class="hud-badge" id="hudBadge">🟢 Kaşif</div>
       </div>
     </div>
     <div class="hud-right">
@@ -824,7 +826,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let curUser=null, curUserData=null, authMode='login', resumeData=null;
+let curUser=null, curUserData=null, authMode='login', resumeData=null, pendingUnlock=null;
 
 // ═══════════════════════════════════════════
 //  AUTH UI
@@ -871,16 +873,20 @@ function doRegister(){
 
   document.getElementById('btnReg').disabled=true;
   auth.createUserWithEmailAndPassword(email,pass).then(cred=>{
+    const lv = emptyLevels();
+    if(pendingUnlock==='s' && guestKasifAcc>=60){
+      lv.g = {completed:true, bestAcc:guestKasifAcc, attempts:1, xp:0};
+    }
     return db.collection('users').doc(cred.user.uid).set({
       email, nickname:nick,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      levels: emptyLevels(), inProgress:null, totalXp:0,
+      levels: lv, inProgress:null, totalXp:0,
       kvkkOnay: true,
       emailOnay: emailConsent,
       kayitTarihi: new Date().toISOString()
     }).then(()=>{
       db.collection('leaderboard').doc(cred.user.uid).set({
-        nickname:nick, totalXp:0, gDone:false, sDone:false, xDone:false,
+        nickname:nick, totalXp:0, gDone:!!lv.g.completed, sDone:false, xDone:false,
         emailOnay: emailConsent
       });
       document.getElementById('btnReg').disabled=false;
@@ -1044,22 +1050,38 @@ auth.onAuthStateChanged(user=>{
       curUserData = doc.exists ? doc.data() : {email:user.email,nickname:user.email.split('@')[0],levels:emptyLevels(),inProgress:null,totalXp:0};
       if(!doc.exists) db.collection('users').doc(user.uid).set(curUserData);
       document.getElementById('userBarName').textContent=curUserData.nickname||user.email;
-      document.getElementById('userBar').style.display='flex';
+      document.getElementById('lbBtn').style.display='inline-block';
+      document.getElementById('loginBtn').style.display='none';
+      document.getElementById('logoutBtn').style.display='inline-block';
       document.getElementById('adminBtn').style.display = ADMIN_EMAILS.includes(user.email) ? 'inline-block' : 'none';
       updateLevelLocks();
-      prevPg='pg-land'; showPg('pg-land');
+      if(pendingUnlock){
+        const target=pendingUnlock; pendingUnlock=null;
+        prevPg='pg-land';
+        tryStartLevel(target);
+      } else {
+        prevPg='pg-land'; showPg('pg-land');
+      }
     });
   } else {
     curUser=null; curUserData=null;
-    setAuthTab('login');
-    showPg('pg-auth');
+    document.getElementById('userBarName').textContent='Misafir (Demo)';
+    document.getElementById('lbBtn').style.display='none';
+    document.getElementById('adminBtn').style.display='none';
+    document.getElementById('loginBtn').style.display='inline-block';
+    document.getElementById('logoutBtn').style.display='none';
+    updateLevelLocks();
+    if(document.querySelector('#pg-auth.on')){ /* auth ekranındaysa orada kal */ }
+    else { prevPg='pg-land'; showPg('pg-land'); }
   }
 });
+function openAuthFromLand(){ pendingUnlock=null; setAuthTab('login'); showPg('pg-auth'); }
+function promptAuthForUnlock(lev){ pendingUnlock=lev; setAuthTab('register'); showPg('pg-auth'); }
 
 function updateLevelLocks(){
   const lv=(curUserData&&curUserData.levels)||{};
-  const sLocked = !(lv.g && lv.g.completed);
-  const xLocked = !(lv.s && lv.s.completed);
+  const sLocked = !(curUser && lv.g && lv.g.bestAcc>=60);
+  const xLocked = !(curUser && lv.s && lv.s.completed);
   document.getElementById('levLock-s').style.display = sLocked?'inline-flex':'none';
   document.getElementById('levLock-x').style.display = xLocked?'inline-flex':'none';
   document.getElementById('levCard-s').classList.toggle('locked', sLocked);
@@ -1069,13 +1091,34 @@ function updateLevelLocks(){
 // ═══════════════════════════════════════════
 //  SEVİYE GİRİŞ / DEVAM ETME (RESUME)
 // ═══════════════════════════════════════════
+let guestKasifAcc = 0;
 function tryStartLevel(lev){
-  if(!curUserData) return;
-  if(lev==='s' && !(curUserData.levels.g && curUserData.levels.g.completed)){ popup('🔒 Önce Giriş seviyesini tamamla'); return; }
-  if(lev==='x' && !(curUserData.levels.s && curUserData.levels.s.completed)){ popup('🔒 Önce Orta seviyesini tamamla'); return; }
-  const ip=curUserData.inProgress;
-  if(ip && ip.lev===lev){ resumeData=ip; showResumePrompt(lev); }
-  else { startLevel(lev); }
+  if(lev==='g'){
+    if(curUser && curUserData){
+      const ip=curUserData.inProgress;
+      if(ip && ip.lev==='g'){ resumeData=ip; showResumePrompt('g'); return; }
+    }
+    startLevel('g');
+    return;
+  }
+  if(lev==='s'){
+    if(!curUser){
+      if(guestKasifAcc>=60){ promptAuthForUnlock('s'); }
+      else { popup('🔒 Önce Kaşif\'te %60 ve üzeri başarı göster'); }
+      return;
+    }
+    if(!(curUserData.levels.g && curUserData.levels.g.bestAcc>=60)){ popup('🔒 Önce Kaşif\'te %60 ve üzeri başarı göster'); return; }
+    const ip=curUserData.inProgress;
+    if(ip && ip.lev==='s'){ resumeData=ip; showResumePrompt('s'); } else { startLevel('s'); }
+    return;
+  }
+  if(lev==='x'){
+    if(!curUser){ popup('🔒 Bu seviye için hesap girişi gerekli'); return; }
+    if(!(curUserData.levels.s && curUserData.levels.s.completed)){ popup('🔒 Önce Stratejist\'i tamamla'); return; }
+    const ip=curUserData.inProgress;
+    if(ip && ip.lev==='x'){ resumeData=ip; showResumePrompt('x'); } else { startLevel('x'); }
+    return;
+  }
 }
 function showResumePrompt(lev){
   const cfg=LEV[lev];
@@ -1151,8 +1194,8 @@ function renderAdmin(){
     el.innerHTML=`
       <div class="adm-summary">
         <div class="rs"><div class="rs-n">${total}</div><div class="rs-l">Kayıtlı Kullanıcı</div></div>
-        <div class="rs"><div class="rs-n">${gDone}</div><div class="rs-l">Giriş Tamamlayan</div></div>
-        <div class="rs"><div class="rs-n">${xDone}</div><div class="rs-l">Ustalık Tamamlayan</div></div>
+        <div class="rs"><div class="rs-n">${gDone}</div><div class="rs-l">Kaşif Tamamlayan</div></div>
+        <div class="rs"><div class="rs-n">${xDone}</div><div class="rs-l">Dönüşüm Lideri Tamamlayan</div></div>
       </div>
       <div style="overflow-x:auto"><table class="adm-table">
         <thead><tr><th>Kullanıcı</th><th>Seviye</th><th>En İyi Başarı</th><th>Toplam XP</th><th>Yarım Kalan</th></tr></thead>
@@ -1238,9 +1281,9 @@ const CHAPTERS={
   x:[{i:'🔥',n:'Kriz Liderliği',s:'Çok Katmanlı'},{i:'🧩',n:'Model Sentezi',s:'Entegre Analiz'},{i:'🚀',n:'Stratejik Dönüşüm',s:'Ustalık'},{i:'👑',n:'Kalıcı Değişim',s:'Sistem Mimarisi'}]
 };
 const LEV={
-  g:{n:'Giriş',i:'🌱',bc:'bg-g',pc:'pi-g',hc:'hg',cnt:10,pool:POOL_G},
-  s:{n:'Orta', i:'⚡',bc:'bg-s',pc:'pi-s',hc:'hs',cnt:10,pool:POOL_S},
-  x:{n:'Ustalık',i:'🔥',bc:'bg-x',pc:'pi-x',hc:'hx',cnt:10,pool:POOL_X}
+  g:{n:'Kaşif',i:'🟢',bc:'bg-g',pc:'pi-g',hc:'hg',cnt:10,pool:POOL_G},
+  s:{n:'Stratejist', i:'🟡',bc:'bg-s',pc:'pi-s',hc:'hs',cnt:10,pool:POOL_S},
+  x:{n:'Dönüşüm Lideri',i:'🔴',bc:'bg-x',pc:'pi-x',hc:'hx',cnt:10,pool:POOL_X}
 };
 const NL={g:'s',s:'x',x:null};
 const RANKS=[{m:0,n:'Başlangıç'},{m:250,n:'Temsilci'},{m:500,n:'Lider'},{m:800,n:'Mimar'},{m:1200,n:'Usta'}];
@@ -1436,7 +1479,15 @@ function showResults(){
   }).join('');
 
   let nlHtml='';
-  if(nl&&acc>=60){
+  if(S.lev==='g' && !curUser){
+    guestKasifAcc = acc;
+    if(acc>=60){
+      nlHtml=`<div class="nlev nl-s">
+<div class="nl-t">🟡 Stratejist Seviyesine Geç!</div>
+<div class="nl-s2">%60 ve üzeri başarı gösterdin — devam etmek için ücretsiz hesap oluştur.</div>
+<button class="btn-nlev" onclick="promptAuthForUnlock('s')">Hesap Oluştur ve Devam Et →</button></div>`;
+    }
+  } else if(nl&&acc>=60){
     const nlCfg=LEV[nl];
     nlHtml=`<div class="nlev ${nlCls[nl]}">
 <div class="nl-t">${nlCfg.i} ${nlCfg.n} Seviyesine Geç!</div>
